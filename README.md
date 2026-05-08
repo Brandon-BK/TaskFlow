@@ -129,5 +129,5 @@ This project helped improve understanding of:
 
 Brandon Kisibu
 
-- GitHub: www.linkedin.com/in/brandon-kisibu-b96a6b226
+- GitHub: https://github.com/Brandon-BK
 - edX username: brandon0611
