@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TaskFlow — CS50 Project Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-grid">
+    <div class="auth-hero">
+      <div class="brand">Task<span>Flow</span></div>
+      <div>
+        <div class="auth-hero-tagline">Build things<br>that <em>matter.</em></div>
+        <p>Manage projects, track tasks, and ship great work — all in one focused workspace.</p>
+      </div>
+      <div style="color:var(--muted); font-size:12px; opacity:0.5;">CS50x Final Project · 2026</div>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+      </div>
+      <!-- Login -->
+      <div id="form-login">
+        <div class="form-group" style="margin-bottom:16px">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <div class="auth-error" id="login-error"></div>
+        <button class="btn-primary" style="width:100%;margin-top:12px" id="btn-login" onclick="handleLogin()">Sign In</button>
+      </div>
+      <!-- Signup -->
+      <div id="form-signup" style="display:none">
+        <div class="form-group" style="margin-bottom:16px">
+          <label>Display Name</label>
+          <input type="text" id="signup-name" placeholder="Your name" />
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label>Email</label>
+          <input type="email" id="signup-email" placeholder="you@example.com" />
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Password</label>
+          <input type="password" id="signup-password" placeholder="Min. 6 characters" />
+        </div>
+        <div class="auth-error" id="signup-error"></div>
+        <button class="btn-primary" style="width:100%;margin-top:12px" id="btn-signup" onclick="handleSignup()">Create Account</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <nav class="topnav">
+    <div class="brand">Task<span style="color:var(--accent)">Flow</span></div>
+    <div class="nav-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <span id="user-name-display">User</span>
+      </div>
+      <button class="btn-ghost" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </nav>
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="sidebar-label">Projects</div>
+      <div id="project-list"></div>
+      <button class="btn-new-project" onclick="openProjectModal()">
+        <span style="font-size:18px">+</span> New Project
+      </button>
+      <div class="sidebar-stats">
+        <div class="stat-row"><span>Total Tasks</span><span id="stat-total">0</span></div>
+        <div class="stat-row"><span>In Progress</span><span id="stat-progress">0</span></div>
+        <div class="stat-row"><span>Completed</span><span id="stat-done">0</span></div>
+      </div>
+    </aside>
+    <main class="main-content">
+      <div class="content-header">
+        <div>
+          <h1 id="project-title">All Tasks</h1>
+          <p id="project-desc" style="color:var(--muted);font-size:14px;margin-top:4px"></p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-ghost" onclick="openTaskModal()">+ Add Task</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('high',this)">🔴 High Priority</button>
+        <button class="filter-btn" onclick="setFilter('medium',this)">🟡 Medium</button>
+        <button class="filter-btn" onclick="setFilter('low',this)">🔵 Low</button>
+      </div>
+      <div class="kanban-board" id="kanban-board"></div>
+    </main>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="task-modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="task-modal-title">New Task</div>
+    <div class="modal-grid">
+      <div class="form-group">
+        <label>Task Title</label>
+        <input type="text" id="task-title-input" placeholder="What needs to be done?" />
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="task-priority">
+          <option value="high">🔴 High</option>
+          <option value="medium" selected>🟡 Medium</option>
+          <option value="low">🔵 Low</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="task-status">
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1">
+        <label>Notes (optional)</label>
+        <textarea id="task-notes" placeholder="Any extra details..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date" id="task-due" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeTaskModal()">Cancel</button>
+      <button class="btn-primary" id="btn-save-task" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT MODAL -->
+<div class="modal-overlay" id="project-modal-overlay">
+  <div class="modal">
+    <div class="modal-title">New Project</div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="form-group">
+        <label>Project Name</label>
+        <input type="text" id="proj-name-input" placeholder="e.g. Website Redesign" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="proj-desc-input" placeholder="What is this project about?" style="min-height:60px"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-swatches" id="color-swatches"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeProjectModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="confirm-modal-overlay">
+  <div class="modal confirm-modal">
+    <span class="confirm-icon">🗑️</span>
+    <div class="modal-title">Delete Task?</div>
+    <p class="confirm-message">
+      You are about to permanently delete <strong id="confirm-task-name"></strong>.<br>
+      This action cannot be undone.
+    </p>
+    <div class="confirm-actions">
+      <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn-danger" onclick="executeDelete()">Yes, Delete It</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
